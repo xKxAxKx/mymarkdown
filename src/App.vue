@@ -1,22 +1,24 @@
 <template>
   <div id="app">
-    <Home v-if="!login"></Home>
-    <Editor v-if="login" :user="userData"></Editor>
+    <Home v-if="!isLogin"></Home>
+    <Editor v-if="isLogin" :user="userData"></Editor>
   </div>
 </template>
 <script>
 import Home from './components/Home.vue';
 import Editor from './components/Editor.vue';
+
 export default{
   name: 'app',
   data() {
     return {
-      login: false
+      isLogin: false,
+      userData: null,
     }
   },
   created: function() {
     firebase.auth().onAuthStateChanged(user => {
-      console.log(user);
+      console.log(this.isLogin);
       if(user) {
         this.isLogin = true;
         this.userdata = user;
