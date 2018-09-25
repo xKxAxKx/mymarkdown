@@ -39,10 +39,10 @@ export default {
       this.selectedIndex = index;
     },
     preview: function() {
-      return marked(this.memos.[this.selectedIndex].markdown);
+      return marked(this.memos[this.selectedIndex].markdown);
     },
     displayTitle: function(text) {
-      return text.split(/\n/)[0];​
+      return text.split(/\n/)[0];
     },
   }
 }
