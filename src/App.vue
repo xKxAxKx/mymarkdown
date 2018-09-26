@@ -1,8 +1,8 @@
 <template>
   <div id="app">
-    <!-- <Home v-if="!isLogin"></Home>
-    <Editor v-if="isLogin" :user="userData"></Editor> -->
-    <Editor></Editor>
+    <Home v-if="!isLogin"></Home>
+    <Editor v-if="isLogin" :user="userData"></Editor>
+    <!-- <Editor></Editor> -->
   </div>
 </template>
 <script>
@@ -23,6 +23,7 @@ export default{
       if(user) {
         this.isLogin = true;
         this.userdata = user;
+        console.log(this.userdata);
       } else {
         this.isLogin = false;
         this.userdata = null;

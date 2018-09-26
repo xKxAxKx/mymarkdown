@@ -1,40 +1,80 @@
 <template>
-  <div class="editor">
-    <h1>エディター画面</h1>
-    <button @click="logout"> ログアウト </button>
-    <div>
-      <div class="memoListWrapper">
-        <div class="memoList" v-for="(memo, index) in memos" @click="selectMemo(index)" data-selected="index==selectedIndex">
-          <p class="memoTitle">{{ displayTitle(memo.markdown) }}</p>
-        </div>
-        <button class="addMemoBtn" @click="addMemo">メモの追加</button>
-        <button class="deleteMemoBtn" v-if="memos.length > 1" @click="deleteMemo">選択中のメモの削除</button>
+<div id="editor">
+  <h1>エディター画面</h1>
+  <span>{{ user.displayName }}</span>
+  <button @click="logout">ログアウト</button>
+  <div class="editorWrapper">
+    <div class="memoListWrapper">
+      <div class="memoList" v-for="(memo, index) in memos" :key="index" @click="selectMemo(index)" :data-selected="index == selectedIndex">
+        <p class="memoTitle">{{ displayTitle(memo.markdown) }}</p>
       </div>
+      <button class="addMemoBtn" @click="addMemo">メモの追加</button>
+      <button class="deleteMemoBtn" v-if="memos.length > 1" @click="deleteMemo">選択中のメモの削除</button>
+      <button class="saveMemosBtn" @click="saveMemos">メモの保存</button>
     </div>
-    <textarea​ class="markdown" v-model="memos[selectedIndex].markdown"></textarea>​
-    <div class="preview" ​v-html="preview()"></div>
+    <textarea class="markdown" v-model="memos[selectedIndex].markdown"></textarea>
+    <div class="preview markdown-body" v-html="preview()"></div>
   </div>
+</div>
 </template>
+
 <script>
-import marked from 'marked';
+import marked from "marked";
 export default {
-  name: 'editor',
-  // props: ['user'],
-  data () {
+  name: "editor",
+  props: ["user"],
+  data() {
     return {
-      memos: [{
-        markdown: ''
-      }],
-    }
+      memos: [
+        {
+          markdown: ""
+        }
+      ],
+      selectedIndex: 0
+    };
+  },
+  created: function() {
+    firebase
+      .database()
+      .ref("memos/" + this.user.uid)
+      .once("value")
+      .then(result => {
+        if (result.val()) {
+          this.memos = result.val();
+        }
+      });
+  },
+  mounted: function() {
+    document.onkeydown = e => {
+      if (e.key == "s" && (e.metaKey || e.ctrlKey)) {
+        this.saveMemos();
+        return false;
+      }
+    };
+  },
+  beforeDestroy: function() {
+    document.onkeydown = null;
   },
   methods: {
     logout: function() {
       firebase.auth().signOut();
     },
     addMemo: function() {
-      this.memo.push({
-        markdown: '無題のメモ',
-      })
+      this.memos.push({
+        markdown: "無題のメモ"
+      });
+    },
+    deleteMemo: function() {
+      this.memos.splice(this.selectedIndex, 1);
+      if (this.selectedIndex > 0) {
+        this.selectedIndex--;
+      }
+    },
+    saveMemos: function() {
+      firebase
+        .database()
+        .ref("memos/" + this.user.uid)
+        .set(this.memos);
     },
     selectMemo: function(index) {
       this.selectedIndex = index;
@@ -43,21 +83,18 @@ export default {
       return marked(this.memos[this.selectedIndex].markdown);
     },
     displayTitle: function(text) {
-      return text.split(/\n/)[0];
-    },
-    deleteMemo: function() {
-      this.memo.splice(this.selectedIndex, 1);
-      if (this.selectedIndex > 0) {
-        this.selectedIndex--;
-      }
+      return text.split(/\n/)[0].replace(/#\s/, "");
     }
   }
-}
+};
 </script>
-<style lang="scss">
+
+<style lang="scss" scoped>
+.editorWrapper {
+  display: flex;
+}
 .memoListWrapper {
-  width: 19%;
-  float: left;
+  width: 20%;
   border-top: 1px solid #000;
 }
 .memoList {
@@ -81,16 +118,14 @@ export default {
 .addMemoBtn {
   margin-top: 20px;
 }
-.editorWrapper {
-  display: flex;
+.deleteMemoBtn {
+  margin: 10px;
 }
 .markdown {
-  float: left;
   width: 40%;
   height: 500px;
 }
 .preview {
-  float: left;
   width: 40%;
   text-align: left;
 }
