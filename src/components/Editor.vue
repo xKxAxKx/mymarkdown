@@ -8,7 +8,7 @@
           <p class="memoTitle">{{ displayTitle(memo.markdown) }}</p>
         </div>
         <button class="addMemoBtn" @click="addMemo">メモの追加</button>
-        <button class="deleteMemoBtn" v-if="memo.length > 1" @click="deleteMemo">選択中のメモの削除</button>
+        <button class="deleteMemoBtn" v-if="memos.length > 1" @click="deleteMemo">選択中のメモの削除</button>
       </div>
     </div>
     <textarea​ class="markdown" v-model="memos[selectedIndex].markdown"></textarea>​
@@ -19,7 +19,7 @@
 import marked from 'marked';
 export default {
   name: 'editor',
-  props: ['user'],
+  // props: ['user'],
   data () {
     return {
       memos: [{
@@ -45,6 +45,12 @@ export default {
     displayTitle: function(text) {
       return text.split(/\n/)[0];
     },
+    deleteMemo: function() {
+      this.memo.splice(this.selectedIndex, 1);
+      if (this.selectedIndex > 0) {
+        this.selectedIndex--;
+      }
+    }
   }
 }
 </script>
